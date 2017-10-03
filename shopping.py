@@ -1,5 +1,24 @@
 import random
 
+class Goods:
+    def __init__(self, price, color):
+        self.price = price
+        self.price = color
+        self.color = color
+        self.size = size
+
+class Carpet(Goods):
+    pass
+
+class Moket(Goods):
+    def __init__(self, size, m2_price):
+        self.size = size
+        self.m2_price = m2_price
+
+    @property
+    def total_price(self):
+        return size*m2_price
+
 
 class Shop:
     def __init__(self, name, stock, cash):
@@ -34,7 +53,7 @@ class Customer:
 
     def debit(self, amount):
         if self.cash - amount < 0:
-            print("Too expensive")
+            print(self.name,": Not enough cash")
         else:
             self.cash -= amount
             self.expense += amount
