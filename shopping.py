@@ -1,47 +1,58 @@
 import random
 
+
 class Goods:
     def __init__(self, price, color):
         self.price = price
-        self.price = color
         self.color = color
         self.size = size
 
+
 class Carpet(Goods):
+    def __init__(self, price, color):
+        self.price = price
+        self.color = color 
     pass
 
+
 class Moket(Goods):
-    def __init__(self, size, m2_price):
+    def __init__(self, size):
         self.size = size
-        self.m2_price = m2_price
+        self.m2_price = 2
 
     @property
     def total_price(self):
-        return size*m2_price
+        return self.size*self.m2_price
 
 
 class Shop:
-    def __init__(self, name, stock, cash):
+    def __init__(self, name, c_stock, m_stock, cash):
         self.name = name
-        self.stock = stock
+        self.c_stock = c_stock
+        self.m_stock = m_stock
         self.cash = cash
         self.gain = 0
-        self.items_sold = 0
+        self.c_items_sold = 0
+        self.m_size_sold = 0
 
-    def deliver(self, items_number):
-        if self.stock - items_number < 0:
-            print("Empty stocks, sorry")
+    def deliver(self, c_items_number, m_size):
+        if self.c_stock - c_items_number < 0:
+            print("Empty carpet stocks, sorry")
+        elif self.m_stock - m_size < 0:     #elif ??
+            print("Empty moket stocks, sorry")
         else:
-            self.stock -= items_number
-            self.items_sold += items_number
+            self.c_stock -= c_items_number
+            self.m_stock -= m_size
+            self.c_items_sold += c_items_number
+            self.m_size_sold += m_size
 
     def credit(self, amount):
         self.cash += amount
         self.gain += amount
 
     def state(self):
-        print("{} :: {} items sold | gain : ${} | treasury : ${}".format(
-            self.name, self.items_sold, self.gain, self.cash))
+        print("{} :: {} carpet sold | {} square meter moket sold | gain : ${} | treasury : ${}".format(
+            self.name, self.c_items_sold, self.m_size_sold, self.gain, self.cash))
 
 
 class Customer:
@@ -49,7 +60,11 @@ class Customer:
         self.name = name
         self.cash = cash
         self.expense = 0
-        self.items = 0
+        self.c_items = 0
+        self.m_size = 0
+
+    def is_solvent(self, amount):
+        return self.cash >= amount 
 
     def debit(self, amount):
         if self.cash - amount < 0:
@@ -59,8 +74,8 @@ class Customer:
             self.expense += amount
 
     def state(self):
-        print("{} :: {} items bought | expenses : ${} | money left : ${}".format(
-            self.name, self.items, self.expense, self.cash))
+        print("{} :: {} carpet bought | {} square meter moket bought | expenses : ${} | money left : ${}".format(
+            self.name, self.c_items, self.m_size, self.expense, self.cash))
 
 
 class Transaction:
@@ -69,30 +84,36 @@ class Transaction:
             code,
             customer,
             shop,
-            amount,
-            items_number,
+            m_size,
+            c_items_number,
             hour,
-            minute):
+            minute,
+            carpet,
+            moket):
+        self.amount = c_items_number*carpet.price + m_size*moket.m2_price
         self.customer = customer
         self.shop = shop
-        self.amount = amount
-        self.items_number = items_number
+        self.c_items_number = c_items_number
+        self.m_size = m_size
         self.hour = hour
         self.minute = minute
         self.id = code
 
     def do(self):
-        self.shop.deliver(self.items_number)
-        self.customer.debit(self.amount)
-        self.shop.credit(self.amount)
-        self.customer.items += self.items_number
-        print(
-            "{} : {} bought {} items in {} for ${}".format(
-                self.id,
-                self.customer.name,
-                self.items_number,
-                self.shop.name,
-                self.amount))
+        if self.customer.is_solvent(self.amount) :
+            self.shop.deliver(self.c_items_number, self.m_size)
+            self.customer.debit(self.amount)
+            self.shop.credit(self.amount)
+            self.customer.c_items += self.c_items_number
+            self.customer.m_size += self.m_size
+            print(
+                "{} : {} bought {} carpet(s) and {} m2 moket in {} for ${}".format(
+                    self.id,
+                    self.customer.name,
+                    self.c_items_number,
+                    self.m_size,
+                    self.shop.name,
+                    self.amount))
 
 
 customers = [
@@ -111,8 +132,9 @@ customers = [
 
 
 def main():
-    shop1 = Shop("HappyTapis", 250, 245)
-    shop2 = Shop("LuxusCarpet", 130, 900)
+    shop1 = Shop("HappyTapis", 250, 240, 245)
+    shop2 = Shop("LuxusCarpet", 130, 420, 900)
+    carpet = Carpet(12, 'blue')
     event_p = 0.04
     opening = 8
     closure = 19
@@ -122,12 +144,13 @@ def main():
             if random.random() < event_p:
                 customer = random.choice(customers)
                 shop = random.choice([shop1, shop2])
-                amount = random.randint(10, 40)
-                items_number = random.randint(1, 3)
+                m_size = random.randint(10, 40)
+                moket = Moket(m_size)
+                c_items_number = random.randint(1, 3)
                 time = random.uniform(8.00, 19.00)
                 tr = Transaction(
                     "transaction_at_{}:{}".format(
-                        h, m), customer, shop, amount, items_number, h, m)
+                        h, m), customer, shop, m_size, c_items_number, h, m, carpet, moket)
                 tr.do()
 
     print("\nSUMMARY\n")
@@ -138,3 +161,10 @@ def main():
 
 
 main()
+
+
+
+
+
+
+
