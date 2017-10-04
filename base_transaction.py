@@ -23,14 +23,13 @@ class TransactionTable(Base):
 			self.customer, self.shop, self.c_items, self.m_size, self.amount)
 
 
-#new_request = Request(title="title", description="bla bla")
+new_transaction = TransactionTable(customer='Kyl', shop='HappyTapis', c_items=3, m_size=12, amount=60)
 
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
 session.add(new_request)
-session.add_all([Request(title=title, description=description)])
 session.commit()
 
 for instance in session.query(Request).order_by(Request.id):
