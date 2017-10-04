@@ -23,17 +23,25 @@ class TransactionTable(Base):
 			self.customer, self.shop, self.c_items, self.m_size, self.amount)
 
 
-new_transaction = TransactionTable(customer='Kyl', shop='HappyTapis', c_items=3, m_size=12, amount=60)
+<<<<<<< HEAD
+#new_transaction = TransactionTable(customer='Kyl', shop='HappyTapis', c_items=3, m_size=12, amount=60)
+>>>>>>> 662481e64503b31b58edc8cda309d1adf38fbeef
 
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 session = Session()
 
 session.add(new_request)
-session.commit()
+<<<<<<< HEAD
+#session.commit()
 
-for instance in session.query(Request).order_by(Request.id):
-	print("\n", instance.id, instance.title, instance.description)
+#for instance in session.query(Request).order_by(Request.id):
+#	print("\n", instance.id, instance.title, instance.description)
+=======
+#session.add_all([Request(title=title, description=description)])
+#session.commit()
+
+>>>>>>> 662481e64503b31b58edc8cda309d1adf38fbeef
 
 
 
