@@ -1,5 +1,15 @@
 import random
+import sqlalchemy
+import csv
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import sessionmaker
 
+engine = create_engine('sqlite:///database.db', echo=False)
+Base = declarative_base()
+Session = sessionmaker(bind=engine)
+session = Session()
 
 class Goods:
     def __init__(self, price, color):
@@ -106,6 +116,8 @@ class Transaction:
             self.shop.credit(self.amount)
             self.customer.c_items += self.c_items_number
             self.customer.m_size += self.m_size
+            new_transaction = TransactionTable(customer=self.customer.name, shop=self.shop.name,c_items=self.c_items_number, m_size=self.m_size, amount=self.amount)
+            session.add(new_transaction)
             print(
                 "{} : {} bought {} carpet(s) and {} m2 moket in {} for ${}".format(
                     self.id,
@@ -115,6 +127,21 @@ class Transaction:
                     self.shop.name,
                     self.amount))
 
+
+class TransactionTable(Base):
+    __tablename__ = 'transactions'
+    id = Column(Integer, primary_key=True)
+    customer = Column(String)
+    shop = Column(String)
+    c_items = Column(Integer)
+    m_size = Column(Integer)
+    amount = Column(Integer)
+
+    def __repr__(self):
+        return "<TransactionTable(customer='%s', shop='%s', c_items='%s', m_size='%s', amount='%s')>" % (
+            self.customer, self.shop, self.c_items, self.m_size, self.amount)
+
+Base.metadata.create_all(engine)
 
 customers = [
     Customer("Aly", 50),
@@ -129,7 +156,6 @@ customers = [
     Customer("Jac", 100),
     Customer("Kyl", 100)
 ]
-
 
 def main():
     shop1 = Shop("HappyTapis", 250, 240, 245)
@@ -159,10 +185,24 @@ def main():
     for c in customers:
         c.state()
 
-
 main()
 
-
+print('ici')
+print(session.query(TransactionTable).count())
+#new_transaction = TransactionTable(customer=self.customer, shop=self.shop,c_items=self.c_items_number, m_size=self.m_size, amount=self.amount)
+#session.add(new_transaction)
+#outcsv.writerow([getattr(new_transaction, column.name) 
+#   for column in TransactionTable.__mapper__.columns])
+#for instance in session.query(TransactionTable).order_by(TransactionTable.amount):
+#    print("\n", instance.shop)
+records = session.query(TransactionTable).all()
+#session.commit()
+outfile = open('mydump.csv', 'w')
+outcsv = csv.writer(outfile)
+outcsv.writerow(['id', 'customer', 'shop', 'carpets_nb', 'moket_size', 'amount'])
+[outcsv.writerow([getattr(curr, column.name)
+                  for column in TransactionTable.__mapper__.columns]) for curr in records]
+outfile.close()
 
 
 
