@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('sqlite:///database.db', echo=False)
+engine = create_engine('sqlite:///:memory:', echo=False)
 Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -185,24 +185,19 @@ def main():
     for c in customers:
         c.state()
 
+    print(session.query(TransactionTable).count())
+    records = session.query(TransactionTable).all()
+    session.commit()
+    outfile = open('static/mydump.csv', 'w')
+    outcsv = csv.writer(outfile)
+    outcsv.writerow(['id', 'customer', 'shop', 'carpets_nb', 'moket_size', 'amount'])
+    [outcsv.writerow([getattr(curr, column.name)
+          for column in TransactionTable.__mapper__.columns]) for curr in records]
+    outfile.close()
+
 main()
 
-print('ici')
-print(session.query(TransactionTable).count())
-#new_transaction = TransactionTable(customer=self.customer, shop=self.shop,c_items=self.c_items_number, m_size=self.m_size, amount=self.amount)
-#session.add(new_transaction)
-#outcsv.writerow([getattr(new_transaction, column.name) 
-#   for column in TransactionTable.__mapper__.columns])
-#for instance in session.query(TransactionTable).order_by(TransactionTable.amount):
-#    print("\n", instance.shop)
-records = session.query(TransactionTable).all()
-#session.commit()
-outfile = open('templates/mydump.csv', 'w')
-outcsv = csv.writer(outfile)
-outcsv.writerow(['id', 'customer', 'shop', 'carpets_nb', 'moket_size', 'amount'])
-[outcsv.writerow([getattr(curr, column.name)
-                  for column in TransactionTable.__mapper__.columns]) for curr in records]
-outfile.close()
+
 
 
 
