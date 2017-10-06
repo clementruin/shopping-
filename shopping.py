@@ -188,7 +188,7 @@ def main():
     print(session.query(TransactionTable).count())
     records = session.query(TransactionTable).all()
     session.commit()
-    outfile = open('static/mydump.csv', 'a')
+    outfile = open('static/mydump.csv', 'w')
     outcsv = csv.writer(outfile)
     outcsv.writerow(['id', 'customer', 'shop', 'carpets_nb', 'moket_size', 'amount'])
     [outcsv.writerow([getattr(curr, column.name)
