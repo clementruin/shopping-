@@ -11,6 +11,7 @@ Base = declarative_base()
 Session = sessionmaker(bind=engine)
 session = Session()
 
+
 class Goods:
     def __init__(self, price, color):
         self.price = price
@@ -21,7 +22,7 @@ class Goods:
 class Carpet(Goods):
     def __init__(self, price, color):
         self.price = price
-        self.color = color 
+        self.color = color
     pass
 
 
@@ -32,7 +33,7 @@ class Moket(Goods):
 
     @property
     def total_price(self):
-        return self.size*self.m2_price
+        return self.size * self.m2_price
 
 
 class Shop:
@@ -48,7 +49,7 @@ class Shop:
     def deliver(self, c_items_number, m_size):
         if self.c_stock - c_items_number < 0:
             print("Empty carpet stocks, sorry")
-        elif self.m_stock - m_size < 0:     #elif ??
+        elif self.m_stock - m_size < 0:  # elif ??
             print("Empty moket stocks, sorry")
         else:
             self.c_stock -= c_items_number
@@ -61,8 +62,13 @@ class Shop:
         self.gain += amount
 
     def state(self):
-        print("{} :: {} carpet sold | {} square meter moket sold | gain : ${} | treasury : ${}".format(
-            self.name, self.c_items_sold, self.m_size_sold, self.gain, self.cash))
+        print(
+            "{} :: {} carpet sold | {} square meter moket sold | gain : ${} | treasury : ${}".format(
+                self.name,
+                self.c_items_sold,
+                self.m_size_sold,
+                self.gain,
+                self.cash))
 
 
 class Customer:
@@ -74,18 +80,23 @@ class Customer:
         self.m_size = 0
 
     def is_solvent(self, amount):
-        return self.cash >= amount 
+        return self.cash >= amount
 
     def debit(self, amount):
         if self.cash - amount < 0:
-            print(self.name,": Not enough cash")
+            print(self.name, ": Not enough cash")
         else:
             self.cash -= amount
             self.expense += amount
 
     def state(self):
-        print("{} :: {} carpet bought | {} square meter moket bought | expenses : ${} | money left : ${}".format(
-            self.name, self.c_items, self.m_size, self.expense, self.cash))
+        print(
+            "{} :: {} carpet bought | {} square meter moket bought | expenses : ${} | money left : ${}".format(
+                self.name,
+                self.c_items,
+                self.m_size,
+                self.expense,
+                self.cash))
 
 
 class Transaction:
@@ -100,7 +111,7 @@ class Transaction:
             minute,
             carpet,
             moket):
-        self.amount = c_items_number*carpet.price + m_size*moket.m2_price
+        self.amount = c_items_number * carpet.price + m_size * moket.m2_price
         self.customer = customer
         self.shop = shop
         self.c_items_number = c_items_number
@@ -110,13 +121,18 @@ class Transaction:
         self.id = code
 
     def do(self):
-        if self.customer.is_solvent(self.amount) :
+        if self.customer.is_solvent(self.amount):
             self.shop.deliver(self.c_items_number, self.m_size)
             self.customer.debit(self.amount)
             self.shop.credit(self.amount)
             self.customer.c_items += self.c_items_number
             self.customer.m_size += self.m_size
-            new_transaction = TransactionTable(customer=self.customer.name, shop=self.shop.name,c_items=self.c_items_number, m_size=self.m_size, amount=self.amount)
+            new_transaction = TransactionTable(
+                customer=self.customer.name,
+                shop=self.shop.name,
+                c_items=self.c_items_number,
+                m_size=self.m_size,
+                amount=self.amount)
             session.add(new_transaction)
             print(
                 "{} : {} bought {} carpet(s) and {} m2 moket in {} for ${}".format(
@@ -141,6 +157,7 @@ class TransactionTable(Base):
         return "<TransactionTable(customer='%s', shop='%s', c_items='%s', m_size='%s', amount='%s')>" % (
             self.customer, self.shop, self.c_items, self.m_size, self.amount)
 
+
 Base.metadata.create_all(engine)
 
 customers = [
@@ -156,6 +173,7 @@ customers = [
     Customer("Jac", 100),
     Customer("Kyl", 100)
 ]
+
 
 def main():
     shop1 = Shop("HappyTapis", 250, 240, 245)
@@ -176,7 +194,16 @@ def main():
                 time = random.uniform(8.00, 19.00)
                 tr = Transaction(
                     "transaction_at_{}:{}".format(
-                        h, m), customer, shop, m_size, c_items_number, h, m, carpet, moket)
+                        h,
+                        m),
+                    customer,
+                    shop,
+                    m_size,
+                    c_items_number,
+                    h,
+                    m,
+                    carpet,
+                    moket)
                 tr.do()
 
     print("\nSUMMARY\n")
@@ -190,16 +217,11 @@ def main():
     session.commit()
     outfile = open('static/mydump.csv', 'w')
     outcsv = csv.writer(outfile)
-    outcsv.writerow(['id', 'customer', 'shop', 'carpets_nb', 'moket_size', 'amount'])
+    outcsv.writerow(['id', 'customer', 'shop',
+                     'carpets_nb', 'moket_size', 'amount'])
     [outcsv.writerow([getattr(curr, column.name)
-          for column in TransactionTable.__mapper__.columns]) for curr in records]
+                      for column in TransactionTable.__mapper__.columns]) for curr in records]
     outfile.close()
 
+
 main()
-
-
-
-
-
-
-

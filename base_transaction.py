@@ -55,5 +55,4 @@ records = session.query(TransactionTable).all()
 print(Base.metadata.tables.keys())
 outfile.close()
 
-#session.add_all([Request(title=title, description=description)])
 session.commit()
